@@ -1,0 +1,11 @@
+en:
+  lita:
+    extensions:
+      confirmation:
+        request: This command requires confirmation. To confirm, send the command "confirm %{code}"
+    handlers:
+      confirmation:
+        help:
+          key: confirm CODE
+          value: Confirms a previously sent command with the confirmation code CODE.
+        invalid_code: "%{code} is not a valid confirmation code. It may have expired. Please run the original command agin."
