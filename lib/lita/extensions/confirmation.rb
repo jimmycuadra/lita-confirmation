@@ -24,7 +24,7 @@ module Lita
           message.reply(
             I18n.t(
               "lita.extensions.confirmation.request",
-              code: UnconfirmedCommand.new(handler, message, robot, route).code
+              code: UnconfirmedCommand.new(handler, message, robot, route, options).code
             )
           )
 

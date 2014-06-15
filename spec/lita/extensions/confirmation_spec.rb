@@ -2,7 +2,7 @@ require "spec_helper"
 
 class Dangerous < Lita::Handler
   route /^danger$/, :danger, command: true, confirmation: true
-  # route /^danger self$/, :danger, command: true, confirmation: { allow_self: false }
+  route /^danger self$/, :disallow_self, command: true, confirmation: { allow_self: false }
   # route(
   #   /^danger restrict$/,
   #   :danger,
@@ -13,6 +13,10 @@ class Dangerous < Lita::Handler
 
   def danger(response)
     response.reply("Dangerous command executed!")
+  end
+
+  def disallow_self(response)
+    response.reply("Dangerous command confirmed by another user and executed!")
   end
 end
 
@@ -38,6 +42,22 @@ describe Dangerous, lita_handler: true do
       send_command("danger")
       send_command("confirm 000000")
       expect(replies.last).to include("000000 is not a valid confirmation code")
+    end
+  end
+
+  context "with allow_self: false" do
+    it "responds with a message if the user tries to confirm their own command" do
+      send_command("danger self")
+      code = replies.last.match(/([a-f0-9]{6})"$/)[1]
+      send_command("confirm #{code}")
+      expect(replies.last).to include("must come from a different user")
+    end
+
+    it "invokes the original route on confirmation by another user" do
+      send_command("danger self")
+      code = replies.last.match(/([a-f0-9]{6})"$/)[1]
+      send_command("confirm #{code}", as: Lita::User.create(123))
+      expect(replies.last).to eq("Dangerous command confirmed by another user and executed!")
     end
   end
 end

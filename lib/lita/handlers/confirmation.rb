@@ -8,8 +8,10 @@ module Lita
       def confirm(response)
         code = response.matches[0][0]
 
-        if (unconfirmed_command = Extensions::Confirmation::UnconfirmedCommand.find(code))
-          unconfirmed_command.call
+        command = Extensions::Confirmation::UnconfirmedCommand.find(code)
+
+        if command
+          command.call(response)
         else
           response.reply(t("invalid_code", code: code))
         end
