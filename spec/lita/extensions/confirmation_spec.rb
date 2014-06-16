@@ -3,12 +3,12 @@ require "spec_helper"
 class Dangerous < Lita::Handler
   route /^danger$/, :danger, command: true, confirmation: true
   route /^danger self$/, :disallow_self, command: true, confirmation: { allow_self: false }
-  # route(
-  #   /^danger restrict$/,
-  #   :danger,
-  #   command: true,
-  #   confirmation: { restrict_to: :dangerous_command_admins }
-  # )
+  route(
+    /^danger restrict$/,
+    :require_auth_group,
+    command: true,
+    confirmation: { restrict_to: :managers }
+  )
   # route /^danger expire$/, :danger, command: true, confirmation: { expire_after: 0 }
 
   def danger(response)
@@ -17,6 +17,10 @@ class Dangerous < Lita::Handler
 
   def disallow_self(response)
     response.reply("Dangerous command confirmed by another user and executed!")
+  end
+
+  def require_auth_group(response)
+    response.reply("Dangerous command confirmed by a manager!")
   end
 end
 
@@ -58,6 +62,32 @@ describe Dangerous, lita_handler: true do
       code = replies.last.match(/([a-f0-9]{6})"$/)[1]
       send_command("confirm #{code}", as: Lita::User.create(123))
       expect(replies.last).to eq("Dangerous command confirmed by another user and executed!")
+    end
+  end
+
+  context "with restrict_to: :managers" do
+    let(:manager) do
+      manager = Lita::User.create(123)
+      allow(Lita::Authorization).to receive(:user_in_group?).with(
+        manager, :managers
+      ).and_return(true)
+      manager
+    end
+
+    it "responds with a message if a user not in a required group tries to confirm a command" do
+      send_command("danger restrict")
+      code = replies.last.match(/([a-f0-9]{6})"$/)[1]
+      send_command("confirm #{code}")
+      expect(replies.last).to include(
+        "must come from a user in one of the following authorization groups: managers"
+      )
+    end
+
+    it "invokes the original route on confirmation by a manager" do
+      send_command("danger restrict")
+      code = replies.last.match(/([a-f0-9]{6})"$/)[1]
+      send_command("confirm #{code}", as: manager)
+      expect(replies.last).to include("confirmed by a manager")
     end
   end
 end

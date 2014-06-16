@@ -11,7 +11,14 @@ module Lita
         command = Extensions::Confirmation::UnconfirmedCommand.find(code)
 
         if command
-          command.call(response)
+          case command.call(response.user)
+          when :other_user_required
+            response.reply(t("other_user_required", code: code))
+          when :user_in_group_required
+            response.reply(
+              t("user_in_group_required", code: code, groups: command.groups.join(", "))
+            )
+          end
         else
           response.reply(t("invalid_code", code: code))
         end

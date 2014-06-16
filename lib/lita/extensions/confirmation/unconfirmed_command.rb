@@ -4,7 +4,7 @@ module Lita
   module Extensions
     class Confirmation
       class UnconfirmedCommand
-        attr_reader :code, :handler, :message, :robot, :route, :options
+        attr_reader :allow_self, :code, :groups, :handler, :message, :robot, :route
 
         class << self
           def find(code)
@@ -21,16 +21,20 @@ module Lita
           @message = message
           @robot = robot
           @route = route
-          @options = Hash === options ? options : {}
+
+          options = Hash === options ? options : {}
+
+          @allow_self = options.key?(:allow_self) ? options[:allow_self] : true
+          @groups = options.key?(:restrict_to) ? Array(options[:restrict_to]) : nil
+
           @code = SecureRandom.hex(3)
+
           self.class.confirmations[code] = self
         end
 
-        def call(response)
-          if disallow_self?(response.user)
-            response.reply("Confirmation #{code} must come from a different user.")
-            return
-          end
+        def call(user)
+          return :other_user_required if disallow_self?(user)
+          return :user_in_group_required unless in_required_group?(user)
 
           handler.dispatch_to_route(route, robot, message)
         end
@@ -38,8 +42,13 @@ module Lita
         private
 
         def disallow_self?(confirming_user)
-          disallowed = options.key?(:allow_self) ? !options[:allow_self] : false
-          true if disallowed && message.user == confirming_user
+          true if !allow_self && message.user == confirming_user
+        end
+
+        def in_required_group?(user)
+          return true unless groups
+
+          groups.any? { |group| Lita::Authorization.user_in_group?(user, group) }
         end
       end
     end

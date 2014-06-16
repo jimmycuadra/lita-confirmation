@@ -9,3 +9,5 @@ en:
           key: confirm CODE
           value: Confirms a previously sent command with the confirmation code CODE.
         invalid_code: "%{code} is not a valid confirmation code. It may have expired. Please run the original command agin."
+        other_user_required: "Confirmation %{code} must come from a different user."
+        user_in_group_required: "Confirmation %{code} must come from a user in one of the following authorization groups: %{groups}"
