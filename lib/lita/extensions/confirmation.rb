@@ -31,7 +31,7 @@ module Lita
           return false
         end
 
-        return true
+        true
       end
     end
 

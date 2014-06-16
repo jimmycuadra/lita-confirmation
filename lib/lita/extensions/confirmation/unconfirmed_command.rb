@@ -26,22 +26,11 @@ module Lita
           @robot = robot
           @route = route
 
-          options = Hash === options ? options : {}
-
-          @allow_self = options.key?(:allow_self) ? options[:allow_self] : true
-          @groups = options.key?(:restrict_to) ? Array(options[:restrict_to]) : nil
-
           @code = SecureRandom.hex(3)
 
           self.class.confirmations[code] = self
 
-          expiry = options.key?(:expire_after) ? options[:expire_after] : 60
-
-          Thread.new do
-            Lita::Timer.new(interval: expiry) do
-              self.class.confirmations.delete(code)
-            end.start
-          end
+          process_options(options)
         end
 
         def call(user)
@@ -61,6 +50,21 @@ module Lita
           return true unless groups
 
           groups.any? { |group| Lita::Authorization.user_in_group?(user, group) }
+        end
+
+        def process_options(options)
+          options = Hash === options ? options : {}
+
+          @allow_self = options.key?(:allow_self) ? options[:allow_self] : true
+          @groups = options.key?(:restrict_to) ? Array(options[:restrict_to]) : nil
+
+          expiry = options.key?(:expire_after) ? options[:expire_after] : 60
+
+          Thread.new do
+            Lita::Timer.new(interval: expiry) do
+              self.class.confirmations.delete(code)
+            end.start
+          end
         end
       end
     end
