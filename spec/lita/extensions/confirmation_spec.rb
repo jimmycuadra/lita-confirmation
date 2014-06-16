@@ -9,7 +9,7 @@ class Dangerous < Lita::Handler
     command: true,
     confirmation: { restrict_to: :managers }
   )
-  # route /^danger expire$/, :danger, command: true, confirmation: { expire_after: 0 }
+  route /^danger expire$/, :expire_early, command: true, confirmation: { expire_after: 0 }
 
   def danger(response)
     response.reply("Dangerous command executed!")
@@ -22,11 +22,16 @@ class Dangerous < Lita::Handler
   def require_auth_group(response)
     response.reply("Dangerous command confirmed by a manager!")
   end
+
+  def expire_early(response)
+    response.reply("Dangerous command executed within 0 seconds!")
+  end
 end
 
 describe Dangerous, lita_handler: true do
   before do
     allow(Lita).to receive(:handlers).and_return([described_class, Lita::Handlers::Confirmation])
+    Lita::Extensions::Confirmation::UnconfirmedCommand.reset
   end
 
   context "with confirmation: true" do
@@ -88,6 +93,25 @@ describe Dangerous, lita_handler: true do
       code = replies.last.match(/([a-f0-9]{6})"$/)[1]
       send_command("confirm #{code}", as: manager)
       expect(replies.last).to include("confirmed by a manager")
+    end
+  end
+
+  context "with expire_after: 0" do
+    before { allow(Thread).to receive(:new) }
+
+    it "invokes the original route on confirmation within the expiry" do
+      send_command("danger expire")
+      code = replies.last.match(/([a-f0-9]{6})"$/)[1]
+      send_command("confirm #{code}")
+      expect(replies.last).to include("within 0 seconds")
+    end
+
+    it "responds that the code is invalid after 0 seconds" do
+      allow(Thread).to receive(:new).and_yield
+      send_command("danger expire")
+      code = replies.last.match(/([a-f0-9]{6})"$/)[1]
+      send_command("confirm #{code}")
+      expect(replies.last).to include("not a valid confirmation code")
     end
   end
 end

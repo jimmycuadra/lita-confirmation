@@ -14,6 +14,10 @@ module Lita
           def confirmations
             @confirmations ||= {}
           end
+
+          def reset
+            confirmations.clear
+          end
         end
 
         def initialize(handler, message, robot, route, options)
@@ -30,6 +34,14 @@ module Lita
           @code = SecureRandom.hex(3)
 
           self.class.confirmations[code] = self
+
+          expiry = options.key?(:expire_after) ? options[:expire_after] : 60
+
+          Thread.new do
+            Lita::Timer.new(interval: expiry) do
+              self.class.confirmations.delete(code)
+            end.start
+          end
         end
 
         def call(user)
