@@ -1,5 +1,9 @@
 # lita-confirmation
 
+[![Build Status](https://travis-ci.org/jimmycuadra/lita-confirmation.png?branch=master)](https://travis-ci.org/jimmycuadra/lita-confirmation)
+[![Code Climate](https://codeclimate.com/github/jimmycuadra/lita-confirmation.png)](https://codeclimate.com/github/jimmycuadra/lita-confirmation)
+[![Coverage Status](https://coveralls.io/repos/jimmycuadra/lita-confirmation/badge.png)](https://coveralls.io/r/jimmycuadra/lita-confirmation)
+
 **lita-confirmation** is an extension for [Lita](https://www.lita.io/) that allows handler routes to require "confirmation" before being triggered. Confirmation consists of a second message sent to the robot with a confirmation code.
 
 ## Installation
