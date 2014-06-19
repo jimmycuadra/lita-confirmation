@@ -4,7 +4,7 @@ module Lita
   module Extensions
     class Confirmation
       class UnconfirmedCommand
-        attr_reader :allow_self, :code, :groups, :handler, :message, :robot, :route
+        attr_reader :allow_self, :code, :groups, :handler, :message, :robot, :route, :timer_thread
 
         class << self
           def find(code)
@@ -37,6 +37,8 @@ module Lita
           return :other_user_required if disallow_self?(user)
           return :user_in_group_required unless in_required_group?(user)
 
+          expire
+          timer_thread.kill if timer_thread
           handler.dispatch_to_route(route, robot, message)
         end
 
@@ -44,6 +46,10 @@ module Lita
 
         def disallow_self?(confirming_user)
           true if !allow_self && message.user == confirming_user
+        end
+
+        def expire
+          self.class.confirmations.delete(code)
         end
 
         def in_required_group?(user)
@@ -59,10 +65,9 @@ module Lita
           @groups = options.key?(:restrict_to) ? Array(options[:restrict_to]) : nil
 
           expiry = options.key?(:expire_after) ? options[:expire_after] : 60
-
-          Thread.new do
+          @timer_thread = Thread.new do
             Lita::Timer.new(interval: expiry) do
-              self.class.confirmations.delete(code)
+              expire
             end.start
           end
         end

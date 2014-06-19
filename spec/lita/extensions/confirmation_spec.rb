@@ -47,6 +47,14 @@ describe Dangerous, lita_handler: true do
       expect(replies.last).to eq("Dangerous command executed!")
     end
 
+    it "expires when confirmed" do
+      send_command("danger")
+      code = replies.last.match(/([a-f0-9]{6})"$/)[1]
+      send_command("confirm #{code}")
+      send_command("confirm #{code}")
+      expect(replies.last).to include("not a valid confirmation code")
+    end
+
     it "responds with a message when an invalid code is provided" do
       send_command("danger")
       send_command("confirm 000000")
