@@ -55,7 +55,7 @@ module Lita
         def in_required_group?(user)
           return true unless groups
 
-          groups.any? { |group| Lita::Authorization.user_in_group?(user, group) }
+          groups.any? { |group| robot.auth.user_in_group?(user, group) }
         end
 
         def process_options(options)

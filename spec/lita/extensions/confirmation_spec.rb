@@ -30,7 +30,8 @@ end
 
 describe Dangerous, lita_handler: true do
   before do
-    allow(Lita).to receive(:handlers).and_return([described_class, Lita::Handlers::Confirmation])
+    registry.register_handler(Lita::Handlers::Confirmation)
+    registry.register_hook(:validate_route, Lita::Extensions::Confirmation)
     Lita::Extensions::Confirmation::UnconfirmedCommand.reset
   end
 
@@ -81,9 +82,7 @@ describe Dangerous, lita_handler: true do
   context "with restrict_to: :managers" do
     let(:manager) do
       manager = Lita::User.create(123)
-      allow(Lita::Authorization).to receive(:user_in_group?).with(
-        manager, :managers
-      ).and_return(true)
+      robot.auth.add_user_to_group!(manager, :managers)
       manager
     end
 
