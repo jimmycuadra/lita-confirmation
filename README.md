@@ -84,7 +84,7 @@ Alice: Lita, danger
 Lita: This command requires confirmation. To confirm, send the command "confirm 636f308"
 Alice: Waiting 15 seconds...
 Alice: Lita, confirm 636f308
-Lita: 636f308 is not a valid confirmation code. It may have expired. Please run the original command agin.
+Lita: 636f308 is not a valid confirmation code. It may have expired. Please run the original command again.
 ```
 
 ## License
