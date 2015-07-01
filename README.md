@@ -28,7 +28,7 @@ This will result in the following behavior:
 
 ```
 Alice: Lita, danger
-Lita: This command requires confirmation. To confirm, send the command "confirm 636f308"
+Lita: This command requires confirmation. To confirm, send the command: Lita confirm 636f308
 Alice: Lita, confirm 636f308
 Lita: Dangerous command executed!
 ```
@@ -47,7 +47,7 @@ route /danger/, :danger, command: true, confirmation: { allow_self: false }
 
 ```
 Alice: Lita, danger
-Lita: This command requires confirmation. To confirm, send the command "confirm 636f308"
+Lita: This command requires confirmation. To confirm, send the command: Lita confirm 636f308
 Alice: Lita, confirm 636f308
 Lita: Confirmation 636f308 must come from a different user.
 Bob: Lita, confirm 636f308
@@ -64,7 +64,7 @@ route /danger/, :danger, command: true, confirmation: { restrict_to: :managers }
 
 ```
 Alice: Lita, danger
-Lita: This command requires confirmation. To confirm, send the command "confirm 636f308"
+Lita: This command requires confirmation. To confirm, send the command: Lita confirm 636f308
 Alice: Lita, confirm 636f308
 Lita: Confirmation 636f308 must come from a user in one of the following authorization groups: managers
 Manager: Lita, confirm 636f308
@@ -81,7 +81,7 @@ route /danger/, :danger, command: true, confirmation: { expire_after: 10 }
 
 ```
 Alice: Lita, danger
-Lita: This command requires confirmation. To confirm, send the command "confirm 636f308"
+Lita: This command requires confirmation. To confirm, send the command: Lita confirm 636f308
 Alice: Waiting 15 seconds...
 Alice: Lita, confirm 636f308
 Lita: 636f308 is not a valid confirmation code. It may have expired. Please run the original command again.
