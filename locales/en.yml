@@ -2,7 +2,7 @@ en:
   lita:
     extensions:
       confirmation:
-        request: This command requires confirmation. To confirm, send the command "confirm %{code}"
+        request: "This command requires confirmation. To confirm, send the command: %{prefix}confirm %{code}"
     handlers:
       confirmation:
         help:
