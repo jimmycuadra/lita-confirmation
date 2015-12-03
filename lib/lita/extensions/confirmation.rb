@@ -24,7 +24,7 @@ module Lita
           message.reply(
             I18n.t(
               "lita.extensions.confirmation.request",
-              prefix: @robot.alias ? @robot.alias : "#{@robot.mention_name} ",
+              prefix: @robot.alias ? @robot.alias : "#{@robot.mention_format(@robot.mention_name)} ",
               code: UnconfirmedCommand.new(handler, message, robot, route, options).code
             )
           )

@@ -38,7 +38,7 @@ describe Dangerous, lita_handler: true do
   context "with confirmation: true" do
     it "requires confirmation" do
       send_command("danger")
-      expect(replies.last).to match(/send the command: Lita confirm [a-f0-9]{6}/)
+      expect(replies.last).to match(/send the command: Lita: confirm [a-f0-9]{6}/)
     end
 
     it "requires confirmation with an alias if one is set" do
