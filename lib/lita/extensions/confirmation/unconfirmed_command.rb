@@ -39,6 +39,13 @@ module Lita
 
           expire
           timer_thread.kill if timer_thread
+          robot.trigger(
+            :message_dispatched,
+            handler: handler,
+            route: route,
+            message: message,
+            robot: robot
+          )
           handler.dispatch_to_route(route, robot, message)
         end
 
