@@ -54,6 +54,17 @@ describe Dangerous, lita_handler: true do
       expect(replies.last).to eq("Dangerous command executed!")
     end
 
+    it "triggers the appropriate routes on confirmation" do
+      expect(robot).to receive(:trigger).with(
+        :unhandled_message, hash_including(:message))
+      expect(robot).to receive(:trigger).with(
+        :message_dispatched, hash_including(:handler, :route, :message, :robot)
+      ).twice
+      send_command("danger")
+      code = replies.last.match(/\s([a-f0-9]{6})$/)[1]
+      send_command("confirm #{code}")
+    end
+
     it "expires when confirmed" do
       send_command("danger")
       code = replies.last.match(/\s([a-f0-9]{6})$/)[1]
