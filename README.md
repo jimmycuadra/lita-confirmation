@@ -88,6 +88,76 @@ Alice: Lita, confirm 636f308
 Lita: 636f308 is not a valid confirmation code. It may have expired. Please run the original command again.
 ```
 
+### Two Factor Confirmation
+
+If the basic confirmation is just a "sanity check" (are you sure you want to do this?), and a confirmation
+requiring another group or another user is much more critical ("we want another human to approve this"), then
+two factor confirmation (2FC) is somewhere in the middle ("we want to be really sure it's actually you") and also
+takes some of the verification trust away from Slack. Two factor confirmation works by setting up a TOTP
+(time-based one time password) for each user and verifying it.
+
+When 2FC is used, a TOTP must be entered in addition to the confirmation code:
+
+```
+Alice: Lita, danger
+Lita: This command requires confirmation. To confirm, send the command: Lita confirm 636f308 YOUR_ONE_TIME_PASSWORD
+Alice: Opens Google Authenticator on her phone, looks up the current password
+Alice: Lita, confirm 636f308 682645
+Lita: Dangerous command executed!
+```
+
+The default behavior is not to require 2FC on any routes. This global setting is configurable:
+
+``` ruby
+config.handlers.confirmation.twofactor_default = :allow
+```
+
+There are three choices:
+
+1. `block` - two factor confirmation is not used
+2. `allow` - if the user is enrolled into 2FC, it is used; otherwise, regular confirmation is used.
+3. `require` - 2FC is mandatory. If the user is not enrolled, they will be asked to enroll first.
+
+The default can be overridden for any route:
+
+``` ruby
+route /danger/, :danger, command: true, confirmation: { twofactor: :allow }
+```
+
+To enroll, a user provides an e-mail address, and receives an e-mail with the secret for the TOTP algorithm
+and a QR code in an image that contains the same settings in a format readable by many popular TOTP apps.
+
+```
+Alice: Lita, confirm 2fa enroll alice@corp.io
+Lita: You are now enrolled into two factor confirmation. Check your email inbox for details.
+
+...
+Subject: Lita two-factor confirmation enrollment
+
+Hi Alice,
+
+You are now enrolled into two factor confirmation. Your secret code is yczja4wk5mjy4koe.
+Use the code with any TOTP application such as Google Authenticator
+to generate one-time passwords. Thank you for improving security!
+
+Many applications (including Google Authenticator) can import the secret
+from the QR code attached to this message.
+```
+
+Three configuration settings are used for configuring e-mail:
+
+- `smtp_host`, default `localhost`
+- `smtp_port`, default `25`
+- `from_email`, the From address for the enrollment e-mail.
+
+Lita administrators and members of the `confirmation_admin` group can remove
+2FC registration from other users. There is an "insecure" mode, disabled by
+default, that allows users to remove themselves from 2FC and to enroll multiple
+times. This can be useful when evaluating whether the benefits of 2FC outweigh
+the inconvenience of having to consult another device for the password, and while
+migrating from plain confirmation to 2FC. The config value is `twofactor_secure`
+and the default is `true`.
+
 ## License
 
 [MIT](http://opensource.org/licenses/MIT)

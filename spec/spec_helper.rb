@@ -4,7 +4,10 @@ SimpleCov.formatters = [
   SimpleCov::Formatter::HTMLFormatter,
   Coveralls::SimpleCov::Formatter
 ]
-SimpleCov.start { add_filter "/spec/" }
+SimpleCov.start {
+  add_filter "/spec/"
+  add_filter "/.bundle/"
+}
 
 require "lita-confirmation"
 require "lita/rspec"
