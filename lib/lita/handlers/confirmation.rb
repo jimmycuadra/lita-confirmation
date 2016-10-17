@@ -16,6 +16,8 @@ module Lita
       config :smtp_host, required: false, type: String, default: 'localhost'
       config :smtp_port, required: false, type: Fixnum, default: 25
       config :from_email, required: false, type: String, default: 'example@example.com'
+      config :smtp_login, required: false, type: String, default: nil
+      config :smtp_password, required: false, type: String, default: nil
 
       route /^confirm\s+([a-f0-9]{6})$/i, :confirm, command: true, help: {
         t("confirm_help.key") => t("confirm_help.value")
@@ -158,7 +160,8 @@ Content-Disposition: attachment; filename="qrcode.png"
 MESSAGE_END
 
         Net::SMTP.start(config.smtp_host, config.smtp_port) do |smtp|
-          smtp.send_message message, 'devnull@pagerduty.com', email
+          smtp.authenticate(config.smtp_login, config.smtp_password) if config.smtp_login
+          smtp.send_message(message, config.from_email, email)
         end
       end
     end
